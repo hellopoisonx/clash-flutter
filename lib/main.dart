@@ -25,8 +25,7 @@ void main() async {
     titleBarStyle: TitleBarStyle.normal,
   );
   windowManager.waitUntilReadyToShow(winOpts, () async {
-    Constants.hivePath = p.join(
-        (await getApplicationDocumentsDirectory()).path, "clash_flutter");
+    Constants.hivePath = (await getApplicationSupportDirectory()).path;
     await Directory(Constants.hivePath).create();
     Hive.defaultDirectory = Constants.hivePath;
     Constants.defaultHomeDir = Constants.hivePath;
