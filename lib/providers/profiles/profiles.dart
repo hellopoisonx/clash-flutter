@@ -3,9 +3,11 @@ import 'dart:io';
 import 'package:clash_core/clash_core.dart';
 import 'package:clash_flutter/models/profiles/profile.dart';
 import 'package:clash_flutter/models/profiles/profiles.dart' as p;
+import 'package:clash_flutter/providers/connections/connections.dart';
 import 'package:clash_flutter/providers/logs/logs.dart';
 import 'package:clash_flutter/providers/proxies/proxies.dart';
 import 'package:clash_flutter/providers/rules/rules.dart';
+import 'package:clash_flutter/providers/traffics/traffics.dart';
 import 'package:hive/hive.dart';
 import 'package:path/path.dart' as path;
 import 'package:file_picker/file_picker.dart';
@@ -28,6 +30,8 @@ class Profiles extends _$Profiles {
     ref.invalidate(proxiesProvider);
     ref.invalidate(stdoutProvider);
     ref.invalidate(rulesProvider);
+    ref.invalidate(trafficsProvider);
+    ref.invalidate(connectionsProvider);
     ref.invalidateSelf();
   }
 
