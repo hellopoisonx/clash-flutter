@@ -10,7 +10,7 @@ import 'package:clash_flutter/providers/core/core_status.dart';
 import 'package:clash_flutter/providers/logs/logs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path_provider/path_provider.dart';
+//import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:window_manager/window_manager.dart';
 import 'package:hive/hive.dart';
@@ -25,7 +25,8 @@ void main() async {
     titleBarStyle: TitleBarStyle.normal,
   );
   windowManager.waitUntilReadyToShow(winOpts, () async {
-    Constants.hivePath = (await getApplicationSupportDirectory()).path;
+    //Constants.hivePath = (await getApplicationSupportDirectory()).path;
+    Constants.hivePath = "/etc/clash-flutter";
     await Directory(Constants.hivePath).create();
     Hive.defaultDirectory = Constants.hivePath;
     Constants.defaultHomeDir = Constants.hivePath;
@@ -56,19 +57,21 @@ class App extends ConsumerWidget {
     return status.when(
         loading: () => const MaterialApp(
             home: Scaffold(body: Center(child: CircularProgressIndicator()))),
-        error: (e, s) => MaterialApp(
-              home: Scaffold(
-                body: Center(
-                  child: TextButton(
-                    onPressed: () async {
-                      await clashCore.reboot();
-                    },
-                    child:
-                        const Text("Clash core errors, click here to reboot!"),
-                  ),
+        error: (e, s) {
+          print("$e $s");
+          return MaterialApp(
+            home: Scaffold(
+              body: Center(
+                child: TextButton(
+                  onPressed: () async {
+                    await clashCore.reboot();
+                  },
+                  child: const Text("Clash core errors, click here to reboot!"),
                 ),
               ),
             ),
+          );
+        },
         data: (status) {
           if (status == CoreStatus.shutdown) {
             return MaterialApp(
