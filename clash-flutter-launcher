@@ -1,0 +1,2 @@
+#!/bin/sh
+pkexec env HOME=$HOME  DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY clash-flutter
