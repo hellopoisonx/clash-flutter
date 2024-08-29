@@ -2,9 +2,10 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 @JsonEnum(valueField: "field")
 enum Type {
+  all("all"),
   info("info"),
   warn("warning"),
-  err("err");
+  err("error");
 
   final String field;
 

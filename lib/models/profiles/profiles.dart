@@ -21,7 +21,7 @@ class Profiles with _$Profiles {
 
   static Profiles get profiles {
     final box = Hive.box(name: "clash_flutter");
-    final Profiles profiles = box.get(
+    Profiles profiles = box.get(
       "profiles",
       defaultValue: Profiles(all: [
         Profile(
@@ -31,6 +31,15 @@ class Profiles with _$Profiles {
         )
       ], currentProfilePath: Constants.defaultProfilePath),
     );
+    if (profiles.all.isEmpty) {
+      profiles = profiles.copyWith(all: [
+        Profile(
+          name: p.split(Constants.defaultProfilePath).last,
+          path: Constants.defaultProfilePath,
+          createdTime: DateTime.now(),
+        )
+      ]);
+    }
     box.put("profiles", profiles);
     return profiles;
   }

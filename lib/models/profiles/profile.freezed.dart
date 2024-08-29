@@ -23,10 +23,12 @@ mixin _$Profile {
   String get name => throw _privateConstructorUsedError;
   String get path =>
       throw _privateConstructorUsedError; // subscription-userinfo
-  int? get totalTraffic => throw _privateConstructorUsedError;
-  int? get uploadTraffic => throw _privateConstructorUsedError;
-  int? get downloadTraffic => throw _privateConstructorUsedError;
-  int? get freeTraffic => throw _privateConstructorUsedError;
+  @TrafficJsonConverter()
+  Traffic? get totalTraffic => throw _privateConstructorUsedError;
+  @TrafficJsonConverter()
+  Traffic? get uploadTraffic => throw _privateConstructorUsedError;
+  @TrafficJsonConverter()
+  Traffic? get downloadTraffic => throw _privateConstructorUsedError;
   String? get url => throw _privateConstructorUsedError;
   DateTime? get expirationTime => throw _privateConstructorUsedError; //
   DateTime get createdTime => throw _privateConstructorUsedError;
@@ -48,10 +50,9 @@ abstract class $ProfileCopyWith<$Res> {
   $Res call(
       {String name,
       String path,
-      int? totalTraffic,
-      int? uploadTraffic,
-      int? downloadTraffic,
-      int? freeTraffic,
+      @TrafficJsonConverter() Traffic? totalTraffic,
+      @TrafficJsonConverter() Traffic? uploadTraffic,
+      @TrafficJsonConverter() Traffic? downloadTraffic,
       String? url,
       DateTime? expirationTime,
       DateTime createdTime});
@@ -77,7 +78,6 @@ class _$ProfileCopyWithImpl<$Res, $Val extends Profile>
     Object? totalTraffic = freezed,
     Object? uploadTraffic = freezed,
     Object? downloadTraffic = freezed,
-    Object? freeTraffic = freezed,
     Object? url = freezed,
     Object? expirationTime = freezed,
     Object? createdTime = null,
@@ -94,19 +94,15 @@ class _$ProfileCopyWithImpl<$Res, $Val extends Profile>
       totalTraffic: freezed == totalTraffic
           ? _value.totalTraffic
           : totalTraffic // ignore: cast_nullable_to_non_nullable
-              as int?,
+              as Traffic?,
       uploadTraffic: freezed == uploadTraffic
           ? _value.uploadTraffic
           : uploadTraffic // ignore: cast_nullable_to_non_nullable
-              as int?,
+              as Traffic?,
       downloadTraffic: freezed == downloadTraffic
           ? _value.downloadTraffic
           : downloadTraffic // ignore: cast_nullable_to_non_nullable
-              as int?,
-      freeTraffic: freezed == freeTraffic
-          ? _value.freeTraffic
-          : freeTraffic // ignore: cast_nullable_to_non_nullable
-              as int?,
+              as Traffic?,
       url: freezed == url
           ? _value.url
           : url // ignore: cast_nullable_to_non_nullable
@@ -133,10 +129,9 @@ abstract class _$$ProfileImplCopyWith<$Res> implements $ProfileCopyWith<$Res> {
   $Res call(
       {String name,
       String path,
-      int? totalTraffic,
-      int? uploadTraffic,
-      int? downloadTraffic,
-      int? freeTraffic,
+      @TrafficJsonConverter() Traffic? totalTraffic,
+      @TrafficJsonConverter() Traffic? uploadTraffic,
+      @TrafficJsonConverter() Traffic? downloadTraffic,
       String? url,
       DateTime? expirationTime,
       DateTime createdTime});
@@ -160,7 +155,6 @@ class __$$ProfileImplCopyWithImpl<$Res>
     Object? totalTraffic = freezed,
     Object? uploadTraffic = freezed,
     Object? downloadTraffic = freezed,
-    Object? freeTraffic = freezed,
     Object? url = freezed,
     Object? expirationTime = freezed,
     Object? createdTime = null,
@@ -177,19 +171,15 @@ class __$$ProfileImplCopyWithImpl<$Res>
       totalTraffic: freezed == totalTraffic
           ? _value.totalTraffic
           : totalTraffic // ignore: cast_nullable_to_non_nullable
-              as int?,
+              as Traffic?,
       uploadTraffic: freezed == uploadTraffic
           ? _value.uploadTraffic
           : uploadTraffic // ignore: cast_nullable_to_non_nullable
-              as int?,
+              as Traffic?,
       downloadTraffic: freezed == downloadTraffic
           ? _value.downloadTraffic
           : downloadTraffic // ignore: cast_nullable_to_non_nullable
-              as int?,
-      freeTraffic: freezed == freeTraffic
-          ? _value.freeTraffic
-          : freeTraffic // ignore: cast_nullable_to_non_nullable
-              as int?,
+              as Traffic?,
       url: freezed == url
           ? _value.url
           : url // ignore: cast_nullable_to_non_nullable
@@ -212,10 +202,9 @@ class _$ProfileImpl implements _Profile {
   const _$ProfileImpl(
       {required this.name,
       required this.path,
-      this.totalTraffic,
-      this.uploadTraffic,
-      this.downloadTraffic,
-      this.freeTraffic,
+      @TrafficJsonConverter() this.totalTraffic,
+      @TrafficJsonConverter() this.uploadTraffic,
+      @TrafficJsonConverter() this.downloadTraffic,
       this.url,
       this.expirationTime,
       required this.createdTime});
@@ -229,13 +218,14 @@ class _$ProfileImpl implements _Profile {
   final String path;
 // subscription-userinfo
   @override
-  final int? totalTraffic;
+  @TrafficJsonConverter()
+  final Traffic? totalTraffic;
   @override
-  final int? uploadTraffic;
+  @TrafficJsonConverter()
+  final Traffic? uploadTraffic;
   @override
-  final int? downloadTraffic;
-  @override
-  final int? freeTraffic;
+  @TrafficJsonConverter()
+  final Traffic? downloadTraffic;
   @override
   final String? url;
   @override
@@ -246,7 +236,7 @@ class _$ProfileImpl implements _Profile {
 
   @override
   String toString() {
-    return 'Profile(name: $name, path: $path, totalTraffic: $totalTraffic, uploadTraffic: $uploadTraffic, downloadTraffic: $downloadTraffic, freeTraffic: $freeTraffic, url: $url, expirationTime: $expirationTime, createdTime: $createdTime)';
+    return 'Profile(name: $name, path: $path, totalTraffic: $totalTraffic, uploadTraffic: $uploadTraffic, downloadTraffic: $downloadTraffic, url: $url, expirationTime: $expirationTime, createdTime: $createdTime)';
   }
 
   @override
@@ -262,8 +252,6 @@ class _$ProfileImpl implements _Profile {
                 other.uploadTraffic == uploadTraffic) &&
             (identical(other.downloadTraffic, downloadTraffic) ||
                 other.downloadTraffic == downloadTraffic) &&
-            (identical(other.freeTraffic, freeTraffic) ||
-                other.freeTraffic == freeTraffic) &&
             (identical(other.url, url) || other.url == url) &&
             (identical(other.expirationTime, expirationTime) ||
                 other.expirationTime == expirationTime) &&
@@ -273,17 +261,8 @@ class _$ProfileImpl implements _Profile {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      name,
-      path,
-      totalTraffic,
-      uploadTraffic,
-      downloadTraffic,
-      freeTraffic,
-      url,
-      expirationTime,
-      createdTime);
+  int get hashCode => Object.hash(runtimeType, name, path, totalTraffic,
+      uploadTraffic, downloadTraffic, url, expirationTime, createdTime);
 
   /// Create a copy of Profile
   /// with the given fields replaced by the non-null parameter values.
@@ -305,10 +284,9 @@ abstract class _Profile implements Profile {
   const factory _Profile(
       {required final String name,
       required final String path,
-      final int? totalTraffic,
-      final int? uploadTraffic,
-      final int? downloadTraffic,
-      final int? freeTraffic,
+      @TrafficJsonConverter() final Traffic? totalTraffic,
+      @TrafficJsonConverter() final Traffic? uploadTraffic,
+      @TrafficJsonConverter() final Traffic? downloadTraffic,
       final String? url,
       final DateTime? expirationTime,
       required final DateTime createdTime}) = _$ProfileImpl;
@@ -320,13 +298,14 @@ abstract class _Profile implements Profile {
   @override
   String get path; // subscription-userinfo
   @override
-  int? get totalTraffic;
+  @TrafficJsonConverter()
+  Traffic? get totalTraffic;
   @override
-  int? get uploadTraffic;
+  @TrafficJsonConverter()
+  Traffic? get uploadTraffic;
   @override
-  int? get downloadTraffic;
-  @override
-  int? get freeTraffic;
+  @TrafficJsonConverter()
+  Traffic? get downloadTraffic;
   @override
   String? get url;
   @override

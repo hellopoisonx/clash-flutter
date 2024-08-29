@@ -1,7 +1,8 @@
-import 'dart:async';
-import 'dart:convert';
-import 'package:path/path.dart' as p;
+import 'dart:ffi' as ffi;
 import 'dart:io';
+
+import 'package:clash_core/src/clash_core_generated_bindings.dart';
+import 'package:ffi/ffi.dart';
 
 const String _defaultConfigTemplate = """
 mixed-port: 7890
@@ -25,93 +26,92 @@ enum CoreStatus {
 }
 
 class ClashCore {
-  ClashCore._();
+  ClashCore._() {
+    _bindings = ClashCoreBindings(
+        ffi.DynamicLibrary.open("libclash-meta$_extPlatform"));
+  }
+
+  static String get _extPlatform => Platform.isLinux || Platform.isAndroid
+      ? ".so"
+      : Platform.isMacOS
+          ? ".dylib"
+          : Platform.isWindows
+              ? ".lib"
+              : throw Exception("The platform is not supported");
+
   static ClashCore? _instance;
   static ClashCore get instance => _instance ??= ClashCore._();
 
+  late final ClashCoreBindings _bindings;
   CoreStatus _status = CoreStatus.shutdown;
-  StreamController<CoreStatus> status = StreamController();
-  Process? _process;
-  late Directory _homeDir;
-  late String _profilePath;
+
   late String _externalControllerAddress;
-  Stream<String>? stdout;
-  Stream<String>? stderr;
+  //StreamController<String> stdout = StreamController();
 
-  void _updateStatus(CoreStatus s) {
-    _status = s;
-    status.add(s);
+  void setExternalControllerAddress(String addr) {
+    _externalControllerAddress = addr;
   }
 
-  void setExternalControllerAddress(String addr) =>
-      _externalControllerAddress = addr;
-
-  Future<void> setHomeDir(Directory dir) async {
-    _homeDir = dir;
-  }
-
-  Future<void> setProfilePath(String path) async {
-    _profilePath = path;
-    final File file = File(path);
-    if (!(await file.exists())) {
-      await file.create();
-      await file.writeAsString(_defaultConfigTemplate);
-    }
-    await File(path).copy(p.join(_homeDir.path, "config.yaml"));
-  }
-
-  Future<void> launch([bool isAdmin = false]) async {
-    if (_status == CoreStatus.running) {
-      print("Core is running");
-      return;
-    }
-    print("launching");
-    await File.fromUri(Uri.file(_profilePath)).create();
-    if (!_homeDir.existsSync()) {
+  void setHomeDir(Directory dir) {
+    if (!dir.existsSync()) {
       throw Exception("Home Directory doesn't exist");
     }
-    _process = await Process.start(
-        "clash-meta",
-        [
-          "-d",
-          _homeDir.path,
-          "-f",
-          p.join(_homeDir.path, "config.yaml"),
-          "-ext-ctl",
-          _externalControllerAddress,
-        ],
-        mode: ProcessStartMode.normal);
-    _process?.exitCode.then((code) {
-      if (code > 0) _updateStatus(CoreStatus.err);
-      if (code == 0) _updateStatus(CoreStatus.running);
-      if (code < 0) _updateStatus(CoreStatus.shutdown);
-    });
-    stdout = _process?.stdout.transform(utf8.decoder);
-    stderr = _process?.stderr.transform(utf8.decoder)?..forEach(print);
-    _updateStatus(CoreStatus.running);
+    final s = dir.path.toNativeUtf8().cast<ffi.Char>();
+    _bindings.SetHomeDir(s);
+    calloc.free(s);
   }
 
-  Future<void> shutdown() async {
+  void setProfilePath(String path) {
+    final File file = File(path);
+    if (!file.existsSync()) {
+      file.createSync();
+      file.writeAsStringSync(_defaultConfigTemplate);
+    }
+    final s = path.toNativeUtf8();
+    final result = _bindings.TestConfig(s.cast()).cast<Utf8>().toDartString();
+    if (result.isNotEmpty) {
+      calloc.free(s);
+      throw Exception("Config contains errors: $result");
+    }
+    _bindings.SetConfig(s.cast());
+    calloc.free(s);
+  }
+
+  CoreStatus launch([bool isAdmin = false]) {
+    if (_status == CoreStatus.running) {
+      print("Core is rebooting");
+      shutdown();
+    }
+    print("launching");
+    final result = _bindings.StartCore().cast<Utf8>().toDartString();
+    if (result.isNotEmpty) {
+      _status = CoreStatus.err;
+      throw Exception(result);
+    }
+    final ext = _externalControllerAddress.toNativeUtf8().cast<ffi.Char>();
+    _bindings.StartExternalController(ext);
+    calloc.free(ext);
+    _status = CoreStatus.running;
+    return _status;
+  }
+
+  void shutdown() async {
     if (_status != CoreStatus.running) {
       print("Core is not running, cancel shutting down");
       return;
     }
     print("Shuting down");
-    final result = _process?.kill();
-    if (!(result ?? false)) {
-      _updateStatus(CoreStatus.err);
-      throw Exception("Failed to kill the core process");
-    }
-    _updateStatus(CoreStatus.shutdown);
+    _bindings.StopCore();
+    _status = CoreStatus.shutdown;
   }
 
-  Future<void> reboot() async {
+  void reboot() {
     if (_status != CoreStatus.running) {
       print("first launch");
-      await launch();
+      launch();
     } else {
-      await shutdown();
-      await launch();
+      shutdown();
+      launch();
     }
   }
 }

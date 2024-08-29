@@ -1,9 +1,13 @@
 import 'package:clash_core/clash_core.dart';
+import 'package:clash_flutter/exception/exception.dart';
+import 'package:clash_flutter/pages/configs/configs.dart';
 import 'package:clash_flutter/pages/connections/connections.dart';
 import 'package:clash_flutter/pages/logs/logs.dart';
 import 'package:clash_flutter/pages/profiles/profiles.dart';
 import 'package:clash_flutter/pages/proxies/proxies.dart';
 import 'package:clash_flutter/pages/rules/rules.dart';
+import 'package:clash_flutter/providers/core/core_status.dart';
+import 'package:clash_flutter/providers/memory/memory.dart';
 import 'package:clash_flutter/providers/traffics/traffics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -38,7 +42,7 @@ class _HomePageState extends ConsumerState<HomePage> with WindowListener {
   @override
   void onWindowClose() async {
     super.onWindowClose();
-    await clashCore.shutdown();
+    clashCore.shutdown();
     await windowManager.destroy();
   }
 
@@ -48,11 +52,13 @@ class _HomePageState extends ConsumerState<HomePage> with WindowListener {
     (Icons.person_rounded, "Profiles", ProfilesPage()),
     (Icons.rule_rounded, "Rules", RulesPage()),
     (Icons.computer_rounded, "Connections", ConnectionsPage()),
+    (Icons.settings_rounded, "Settings", ConfigsPage()),
   ];
   int pageIdx = 0;
   @override
   Widget build(BuildContext context) {
     final traffics = ref.watch(trafficsProvider);
+    final memory = ref.watch(memoryProvider);
     return Row(
       children: [
         NavigationRail(
@@ -72,39 +78,79 @@ class _HomePageState extends ConsumerState<HomePage> with WindowListener {
           onDestinationSelected: (idx) => setState(() => pageIdx = idx),
           leading: SizedBox(
             width: 150,
-            height: 100,
-            child: traffics.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, s) => Text("$e $s"),
-                data: (traffics) {
-                  final style = Theme.of(context).textTheme.labelLarge;
-                  return Column(
-                    children: [
-                      Expanded(
-                          child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            height: 160,
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 100,
+                  child: traffics.when(
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
+                      error: (e, s) {
+                        MyException.show(
+                            error: e,
+                            recover: () => ref.invalidate(coreStatusProvider));
+                        return null;
+                      },
+                      data: (traffics) {
+                        final style = Theme.of(context).textTheme.labelLarge;
+                        return Column(
                           children: [
-                            Text("Up:", style: style),
-                            Text("${traffics.$1}/s", style: style),
+                            Expanded(
+                                child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text("Up:", style: style),
+                                  Text("${traffics.$1}/s", style: style),
+                                ],
+                              ),
+                            )),
+                            Expanded(
+                                child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text("Down:", style: style),
+                                  Text("${traffics.$2}/s", style: style),
+                                ],
+                              ),
+                            )),
                           ],
-                        ),
-                      )),
-                      Expanded(
-                          child: Padding(
+                        );
+                      }),
+                ),
+                Expanded(
+                    child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text("Down:", style: style),
-                            Text("${traffics.$2}/s", style: style),
-                          ],
-                        ),
-                      )),
-                    ],
-                  );
-                }),
+                        child: memory.when(
+                          data: (memory) {
+                            final style =
+                                Theme.of(context).textTheme.labelLarge;
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("Mem:", style: style),
+                                Text(memory.toString(), style: style),
+                              ],
+                            );
+                          },
+                          error: (e, s) {
+                            MyException.show(
+                                error: e,
+                                recover: () =>
+                                    ref.invalidate(coreStatusProvider));
+                            return null;
+                          },
+                          loading: () =>
+                              const Center(child: CircularProgressIndicator()),
+                        )))
+              ],
+            ),
           ),
         ),
         Expanded(child: _pages[pageIdx].$3)

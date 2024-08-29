@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:clash_flutter/apis/apis.dart';
 import 'package:clash_flutter/models/proxies/selector.dart';
+import 'package:clash_flutter/providers/commons/commons.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:clash_flutter/models/proxies/proxies.dart' as p;
 
@@ -11,6 +11,7 @@ part 'proxies.g.dart';
 class Proxies extends _$Proxies {
   @override
   Future<p.Proxies> build() async {
+    final apis = await ref.getApis();
     final alive = ref.keepAlive();
     final timer = Timer(const Duration(minutes: 1), alive.close);
     ref.onDispose(timer.cancel);
@@ -18,6 +19,7 @@ class Proxies extends _$Proxies {
   }
 
   Future<int?> testSingleDelay(String target) async {
+    final apis = await ref.getApis();
     final delay = await apis.testSingleDelay(target);
     final prev = await future;
     state =
@@ -26,6 +28,7 @@ class Proxies extends _$Proxies {
   }
 
   Future<Map<String, int?>> testSelectorDelay(Selector target) async {
+    final apis = await ref.getApis();
     final Map<String, int?> delays = await apis.testSelectorDelay(target.name);
     for (var node in target.all) {
       delays.addAll({node: delays[node]});
@@ -36,6 +39,7 @@ class Proxies extends _$Proxies {
   }
 
   void changeProxyInGroup(String group, String proxy) async {
+    final apis = await ref.getApis();
     await apis.changeProxyInGroup(group, proxy);
     final prev = await future;
     state = AsyncValue.data(prev.copyWith(selectors: {
@@ -43,6 +47,4 @@ class Proxies extends _$Proxies {
       group: prev.selectors[group]!.copyWith(now: proxy)
     }));
   }
-
-  void refresh() => ref.invalidateSelf();
 }

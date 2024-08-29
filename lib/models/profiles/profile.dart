@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:traffic/traffic.dart';
 
 part 'profile.g.dart';
 part 'profile.freezed.dart';
@@ -9,10 +10,9 @@ class Profile with _$Profile {
       {required String name,
       required String path,
       // subscription-userinfo
-      int? totalTraffic,
-      int? uploadTraffic,
-      int? downloadTraffic,
-      int? freeTraffic,
+      @TrafficJsonConverter() Traffic? totalTraffic,
+      @TrafficJsonConverter() Traffic? uploadTraffic,
+      @TrafficJsonConverter() Traffic? downloadTraffic,
       String? url,
       DateTime? expirationTime,
       //
@@ -20,4 +20,15 @@ class Profile with _$Profile {
 
   factory Profile.fromJson(Map<String, dynamic> json) =>
       _$ProfileFromJson(json);
+}
+
+class TrafficJsonConverter implements JsonConverter<Traffic?, int?> {
+  const TrafficJsonConverter();
+
+  @override
+  Traffic? fromJson(int? json) =>
+      json != null ? Traffic.fromByte(byte: json) : null;
+
+  @override
+  int? toJson(Traffic? object) => object?.byte;
 }

@@ -1,5 +1,7 @@
-import 'package:clash_flutter/models/log/log.dart';
+import 'package:clash_flutter/exception/exception.dart';
+import 'package:clash_flutter/providers/core/core_status.dart';
 import 'package:clash_flutter/providers/logs/logs.dart';
+import 'package:clash_flutter/models/log/log.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -11,56 +13,37 @@ class LogsPage extends ConsumerStatefulWidget {
 }
 
 class _LogsPageState extends ConsumerState<LogsPage> {
-  bool isApi = true;
+  String query = "";
+  Type type = Type.all;
 
   @override
   Widget build(BuildContext context) {
-    final logs =
-        isApi ? ref.watch(logFromApiProvider) : ref.watch(stdoutProvider);
+    final logs = ref.watch(filteredLogsProvider(query, type));
     return Scaffold(
-      appBar: AppBar(
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Material(
-              //color: Colors.grey.withOpacity(0.3),
-              color: Colors.transparent,
-              borderRadius: BorderRadius.circular(10),
-              child: ToggleButtons(
-                fillColor: Colors.transparent,
-                borderRadius: BorderRadius.circular(10),
-                isSelected: [isApi, !isApi],
-                children: const ["Api", "Stdout"]
-                    .map((text) => Container(
-                          height: 60,
-                          width: 60,
-                          margin: const EdgeInsets.all(2),
-                          child: Center(
-                            child: Container(
-                              padding: const EdgeInsets.all(2),
-                              height: 30,
-                              width: 50,
-                              decoration: BoxDecoration(
-                                  color: isApi
-                                      ? text == "Api"
-                                          ? const Color.fromRGBO(
-                                              232, 222, 248, 1)
-                                          : Colors.transparent
-                                      : text != "Api"
-                                          ? const Color.fromRGBO(
-                                              232, 222, 248, 1)
-                                          : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(10)),
-                              child: Center(child: Text(text)),
-                            ),
-                          ),
-                        ))
-                    .toList(),
-                onPressed: (idx) => setState(() => isApi = idx == 0),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(61),
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  decoration: InputDecoration(
+                      border: const OutlineInputBorder(),
+                      hintText: "Search among ${logs.value?.length ?? 0} logs"),
+                  onChanged: (value) => setState(() => query = value.trim()),
+                ),
               ),
-            ),
-          )
-        ],
+              const SizedBox(width: 5),
+              ToggleButtons(
+                borderRadius: BorderRadius.circular(10),
+                isSelected: Type.values.map((t) => t == type).toList(),
+                onPressed: (idx) => setState(() => type = Type.values[idx]),
+                children: Type.values.map<Text>((t) => Text(t.name)).toList(),
+              ),
+            ],
+          ),
+        ),
       ),
       body: logs.when(
           data: (logs) => ListView.builder(
@@ -75,27 +58,30 @@ class _LogsPageState extends ConsumerState<LogsPage> {
                       color: const Color.fromRGBO(242, 242, 242, 1),
                     ),
                     child: () {
-                      if (!isApi) {
-                        final log = logs[idx] as String;
-                        return ListTile(
-                          leading: Text((logs.length - idx).toString()),
-                          title: Text(log),
-                        );
-                      } else {
-                        final log = logs[idx] as Log;
-                        return ListTile(
-                          leading: Text((logs.length - idx).toString()),
-                          title: Text(log.payload),
-                          subtitle: Text(log.type.field),
-                        );
-                      }
+                      final log = logs[idx];
+                      return ListTile(
+                        leading: Text((logs.length - idx).toString()),
+                        title: Text(log.payload),
+                        subtitle: Text(
+                          log.type.field,
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: log.type == Type.info
+                                      ? Colors.green
+                                      : log.type == Type.err
+                                          ? Colors.red
+                                          : Colors.orange),
+                        ),
+                      );
                     }(),
                   );
                 },
               ),
-          error: (e, s) => Center(
-                child: Text(e.toString()),
-              ),
+          error: (e, s) {
+            MyException.show(
+                error: e, recover: () => ref.invalidate(coreStatusProvider));
+            return null;
+          },
           loading: () => const Center(
                 child: CircularProgressIndicator(),
               )),

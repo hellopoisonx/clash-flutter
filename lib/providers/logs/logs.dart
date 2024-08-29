@@ -1,22 +1,13 @@
-import 'package:clash_core/clash_core.dart';
-import 'package:clash_flutter/apis/apis.dart';
 import 'package:clash_flutter/models/log/log.dart';
+import 'package:fuzzy/fuzzy.dart';
+import 'package:clash_flutter/providers/commons/commons.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'logs.g.dart';
 
 @riverpod
-Stream<List<String>> stdout(StdoutRef ref) async* {
-  List<String> logs = [];
-  await for (var log in clashCore.stdout ?? const Stream<String>.empty()) {
-    if (logs.length > 500) logs.clear();
-    logs.insert(0, log);
-    yield logs;
-  }
-}
-
-@riverpod
-Stream<List<Log>> logFromApi(LogFromApiRef ref) async* {
+Stream<List<Log>> logs(LogsRef ref) async* {
+  final apis = await ref.getApis();
   final stream = apis.getLogs();
   final List<Log> logs = [];
   await for (var log in stream) {
@@ -24,4 +15,27 @@ Stream<List<Log>> logFromApi(LogFromApiRef ref) async* {
     logs.insert(0, log);
     yield logs;
   }
+}
+
+@riverpod
+Future<List<Log>> filteredLogs(
+    FilteredLogsRef ref, String query, Type type) async {
+  final allLogs = await ref.watch(logsProvider.future);
+  List<Log> logs = [];
+  if (type == Type.all) {
+    logs = allLogs;
+  } else {
+    logs = allLogs.where((log) => log.type == type).toList();
+  }
+  if (query.trim().isEmpty) {
+    return logs;
+  }
+  return Fuzzy(logs,
+      options: FuzzyOptions(
+        shouldSort: true,
+        keys: [
+          WeightedKey(
+              name: "payload", getter: (Log log) => log.payload, weight: 1)
+        ],
+      )).search(query).map<Log>((result) => result.item).toList();
 }

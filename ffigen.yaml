@@ -1,0 +1,7 @@
+output: "./clash_core/lib/src/clash_core_generated_bindings.dart"
+name: "ClashCoreBindings"
+headers:
+  entry-points:
+    - "./linux/lib/libclash-meta.h"
+compiler-opts:
+  - "-I /usr/lib/gcc/x86_64-pc-linux-gnu/14.2.1/include/"

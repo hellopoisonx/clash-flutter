@@ -1,5 +1,5 @@
-import 'package:clash_flutter/apis/apis.dart';
 import 'package:clash_flutter/models/connections/connections.dart';
+import 'package:clash_flutter/providers/commons/commons.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -7,6 +7,7 @@ part 'connections.g.dart';
 
 @riverpod
 Stream<Connections> connections(ConnectionsRef ref) async* {
+  final apis = await ref.getApis();
   final stream = apis.getConnections();
   await for (final connections in stream) {
     yield connections;

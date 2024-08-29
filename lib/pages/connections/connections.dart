@@ -1,8 +1,10 @@
 import 'dart:convert';
 
-import 'package:clash_flutter/apis/apis.dart';
+import 'package:clash_flutter/exception/exception.dart';
+import 'package:clash_flutter/providers/apis/apis.dart';
 import 'package:clash_flutter/models/connections/connections.dart';
 import 'package:clash_flutter/providers/connections/connections.dart';
+import 'package:clash_flutter/providers/core/core_status.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:traffic/traffic.dart';
@@ -41,7 +43,8 @@ class _ConnectionsPageState extends ConsumerState<ConnectionsPage> {
               ),
               const SizedBox(width: 5),
               IconButton(
-                onPressed: apis.closeALlConnections,
+                onPressed: () async =>
+                    (await ref.read(apisProvider.future)).closeALlConnections(),
                 icon: const Icon(Icons.cancel_rounded),
               ),
             ],
@@ -53,9 +56,9 @@ class _ConnectionsPageState extends ConsumerState<ConnectionsPage> {
           return _buildConnectionsBoard(horScrollController, _cache, ref);
         },
         error: (error, stack) {
-          return Center(
-            child: Text("$error $stack"),
-          );
+          MyException.show(
+              error: error, recover: () => ref.invalidate(coreStatusProvider));
+          return null;
         },
         data: (connections) {
           _cache = connections.connections;
@@ -82,6 +85,7 @@ class _ConnectionsPageState extends ConsumerState<ConnectionsPage> {
                 child: Table(
                   border: const TableBorder(
                     verticalInside: BorderSide(width: 0.05),
+                    horizontalInside: BorderSide(width: 0.05),
                   ),
                   columnWidths: const {
                     0: FixedColumnWidth(40),
@@ -158,8 +162,9 @@ class _ConnectionsPageState extends ConsumerState<ConnectionsPage> {
                                 },
                                 icon: const Icon(Icons.info)),
                             IconButton(
-                                onPressed: () =>
-                                    apis.closeSingleConnection(c.id),
+                                onPressed: () async =>
+                                    (await ref.read(apisProvider.future))
+                                        .closeSingleConnection(c.id),
                                 icon: const Icon(Icons.cancel)),
                             Text("${c.metadata.type}(${c.metadata.network})"),
                             Text(c.metadata.process),

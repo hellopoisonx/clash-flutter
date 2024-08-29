@@ -1,13 +1,12 @@
 import 'dart:io';
 
 import 'package:clash_core/clash_core.dart';
+import 'package:clash_flutter/constants/constants.dart';
 import 'package:clash_flutter/models/profiles/profile.dart';
 import 'package:clash_flutter/models/profiles/profiles.dart' as p;
-import 'package:clash_flutter/providers/connections/connections.dart';
-import 'package:clash_flutter/providers/logs/logs.dart';
-import 'package:clash_flutter/providers/proxies/proxies.dart';
-import 'package:clash_flutter/providers/rules/rules.dart';
-import 'package:clash_flutter/providers/traffics/traffics.dart';
+import 'package:clash_flutter/models/settings/settings.dart';
+import 'package:clash_flutter/providers/commons/commons.dart';
+import 'package:clash_flutter/providers/core/core_status.dart';
 import 'package:hive/hive.dart';
 import 'package:path/path.dart' as path;
 import 'package:file_picker/file_picker.dart';
@@ -19,19 +18,39 @@ part 'profiles.g.dart';
 class Profiles extends _$Profiles {
   @override
   p.Profiles build() {
+    ref.watch(coreStatusProvider);
     return p.Profiles.profiles;
   }
 
-  Future<void> switchProfile(String path) async {
-    state = state.copyWith(currentProfilePath: path);
+  void switchProfile(Profile profile) {
+    if (!state.all.contains(profile)) {
+      state = state.copyWith(
+          currentProfilePath: profile.path, all: [...state.all, profile]);
+    } else {
+      state = state.copyWith(currentProfilePath: profile.path);
+    }
     syncToHive();
-    await clashCore.setProfilePath(path);
-    await clashCore.reboot();
-    ref.invalidate(proxiesProvider);
-    ref.invalidate(stdoutProvider);
-    ref.invalidate(rulesProvider);
-    ref.invalidate(trafficsProvider);
-    ref.invalidate(connectionsProvider);
+    clashCore.setProfilePath(profile.path);
+    ref.invalidate(coreStatusProvider);
+    ref.invalidateSelf();
+  }
+
+  void deleteProfile(Profile profile) {
+    if (state.currentProfilePath == profile.path) {
+      var profiles = [...state.all];
+      profiles.remove(profile);
+      state = state.copyWith(
+          currentProfilePath: Constants.defaultProfilePath, all: profiles);
+      syncToHive();
+      clashCore.setProfilePath(state.currentProfilePath);
+      ref.invalidate(coreStatusProvider);
+    } else {
+      var profiles = [...state.all];
+      profiles.remove(profile);
+      state = state.copyWith(all: profiles);
+      syncToHive();
+    }
+    File(profile.path).deleteSync();
     ref.invalidateSelf();
   }
 
@@ -41,16 +60,17 @@ class Profiles extends _$Profiles {
       return;
     }
     DateTime t = await File(result).lastModified();
-    state = state.copyWith(currentProfilePath: result, all: [
-      ...state.all,
-      Profile(
-        name: path.split(result).last,
-        path: result,
-        createdTime: t,
-      )
-    ]);
-    syncToHive();
-    await switchProfile(result);
+    switchProfile(Profile(
+      name: path.split(result).last,
+      path: result,
+      createdTime: t,
+    ));
+  }
+
+  Future<void> importFromURL(String url) async {
+    final apis = await ref.getApis();
+    final profile = await apis.downloadProfile(url, Settings.settings.homeDir);
+    switchProfile(profile);
   }
 
   void syncToHive() {

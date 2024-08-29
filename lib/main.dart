@@ -1,19 +1,12 @@
-import 'dart:io';
-
-import 'package:clash_flutter/apis/apis.dart';
-import 'package:clash_flutter/constants/constants.dart';
-import 'package:clash_flutter/models/profiles/profiles.dart';
-import 'package:clash_flutter/models/settings/settings.dart';
+import 'package:clash_flutter/exception/exception.dart';
 import 'package:clash_flutter/pages/home.dart';
+import 'package:clash_flutter/providers/apis/apis.dart';
 import 'package:clash_core/clash_core.dart';
 import 'package:clash_flutter/providers/core/core_status.dart';
 import 'package:clash_flutter/providers/logs/logs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-//import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
 import 'package:window_manager/window_manager.dart';
-import 'package:hive/hive.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,22 +18,6 @@ void main() async {
     titleBarStyle: TitleBarStyle.normal,
   );
   windowManager.waitUntilReadyToShow(winOpts, () async {
-    //Constants.hivePath = (await getApplicationSupportDirectory()).path;
-    Constants.hivePath = "/etc/clash-flutter";
-    await Directory(Constants.hivePath).create();
-    Hive.defaultDirectory = Constants.hivePath;
-    Constants.defaultHomeDir = Constants.hivePath;
-    Constants.defaultProfilePath = p.join(
-        Constants.defaultHomeDir, "${DateTime.now().toIso8601String()}.yaml");
-    Hive.registerAdapter("Settings", (dynamic json) => Settings.fromJson(json));
-    Hive.registerAdapter("Profiles", (dynamic json) => Profiles.fromJson(json));
-    final settings = Settings.settings;
-    await clashCore.setHomeDir(Directory(settings.homeDir));
-    await clashCore.setProfilePath(Profiles.profiles.currentProfilePath);
-    clashCore.setExternalControllerAddress(
-        "${settings.externalControllerBaseAddress}:${settings.externalControllerPort}");
-    await apis.init();
-    await clashCore.launch();
     await windowManager.show();
     await windowManager.focus();
   });
@@ -52,58 +29,18 @@ class App extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.watch(stdoutProvider);
+    MyException.context = context;
     final status = ref.watch(coreStatusProvider);
-    return status.when(
-        loading: () => const MaterialApp(
-            home: Scaffold(body: Center(child: CircularProgressIndicator()))),
-        error: (e, s) {
-          print("$e $s");
-          return MaterialApp(
-            home: Scaffold(
-              body: Center(
+    ref.watch(logsProvider);
+    ref.watch(apisProvider);
+    return MaterialApp(
+        home: status == CoreStatus.shutdown
+            ? Center(
                 child: TextButton(
-                  onPressed: () async {
-                    await clashCore.reboot();
-                  },
-                  child: const Text("Clash core errors, click here to reboot!"),
-                ),
-              ),
-            ),
-          );
-        },
-        data: (status) {
-          if (status == CoreStatus.shutdown) {
-            return MaterialApp(
-              home: Scaffold(
-                body: Center(
-                  child: TextButton(
-                    onPressed: () async {
-                      await clashCore.launch();
-                    },
+                    onPressed: () => ref.invalidate(coreStatusProvider),
                     child: const Text(
-                        "Clash core is not runnig, click here to launch!"),
-                  ),
-                ),
-              ),
-            );
-          }
-          if (status == CoreStatus.err) {
-            return MaterialApp(
-              home: Scaffold(
-                body: Center(
-                  child: TextButton(
-                    onPressed: () async {
-                      await clashCore.reboot();
-                    },
-                    child:
-                        const Text("Clash core errors, click here to reboot!"),
-                  ),
-                ),
-              ),
-            );
-          }
-          return const MaterialApp(home: HomePage());
-        });
+                        "Clash Core is shutdown, click here to launch")),
+              )
+            : const HomePage());
   }
 }

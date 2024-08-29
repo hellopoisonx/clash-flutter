@@ -1,6 +1,7 @@
 import 'package:clash_flutter/models/proxies/node.dart';
 import 'package:clash_flutter/models/proxies/selector.dart';
 import 'package:clash_flutter/models/proxies/type.dart';
+import 'package:clash_flutter/providers/core/core_status.dart';
 import 'package:clash_flutter/providers/proxies/proxies.dart';
 import 'package:clash_flutter/widgets/delay_button.dart';
 import 'package:clash_flutter/widgets/status_indicator.dart';
@@ -14,9 +15,8 @@ class ProxiesPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final proxies = ref.watch(proxiesProvider);
     return Scaffold(
-        backgroundColor: Colors.white,
         floatingActionButton: FloatingActionButton.small(
-          onPressed: ref.read(proxiesProvider.notifier).refresh,
+          onPressed: () => ref.invalidate(proxiesProvider),
           child: const Icon(Icons.refresh_rounded),
         ),
         body: proxies.when(
@@ -151,9 +151,10 @@ class ProxiesPage extends ConsumerWidget {
               );
             },
           ),
-          error: (e, s) => Center(
-            child: Text(e.toString() + s.toString()),
-          ),
+          error: (e, s) {
+            ref.invalidate(coreStatusProvider);
+            return null;
+          },
           loading: () => const Center(
             child: CircularProgressIndicator(),
           ),

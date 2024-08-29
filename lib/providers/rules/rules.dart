@@ -1,4 +1,4 @@
-import 'package:clash_flutter/apis/apis.dart';
+import 'package:clash_flutter/providers/commons/commons.dart';
 import 'package:fuzzy/fuzzy.dart';
 import 'package:clash_flutter/models/rule/rule.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -7,6 +7,7 @@ part 'rules.g.dart';
 
 @riverpod
 Future<List<Rule>> rules(RulesRef ref) async {
+  final apis = await ref.getApis();
   final alive = ref.keepAlive();
   ref.onDispose(alive.close);
   return await apis.getRules();

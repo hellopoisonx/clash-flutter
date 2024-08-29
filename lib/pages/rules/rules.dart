@@ -1,4 +1,6 @@
+import 'package:clash_flutter/exception/exception.dart';
 import 'package:clash_flutter/models/rule/rule.dart';
+import 'package:clash_flutter/providers/core/core_status.dart';
 import 'package:clash_flutter/providers/rules/rules.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,7 +18,6 @@ class _RulesPageState extends ConsumerState<RulesPage> {
   Widget build(BuildContext context) {
     final rules = ref.watch(filteredRulesProvider(query));
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(61),
         child: Padding(
@@ -36,12 +37,14 @@ class _RulesPageState extends ConsumerState<RulesPage> {
           ),
         ),
       ),
-      body: switch (rules) {
-        AsyncLoading() => const Center(child: CircularProgressIndicator()),
-        AsyncError(:final error, :final stackTrace) => Center(
-            child: Text("$error $stackTrace"),
-          ),
-        AsyncValue<List<Rule>>(:final value) => ListView.builder(
+      body: rules.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) {
+          MyException.show(
+              error: error, recover: () => ref.invalidate(coreStatusProvider));
+          return null;
+        },
+        data: (List<Rule>? value) => ListView.builder(
             itemCount: value?.length ?? 0,
             prototypeItem: Container(
               margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
@@ -70,7 +73,7 @@ class _RulesPageState extends ConsumerState<RulesPage> {
                 ),
               );
             }),
-      },
+      ),
     );
   }
 }
