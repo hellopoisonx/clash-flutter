@@ -77,6 +77,23 @@ class ClashCore {
     calloc.free(s);
   }
 
+  void testProfile(String path) {
+    final s = path.toNativeUtf8();
+    final result = _bindings.TestConfig(s.cast()).cast<Utf8>().toDartString();
+    if (result.isNotEmpty) {
+      calloc.free(s);
+      throw Exception("Config contains errors: $result");
+    }
+    calloc.free(s);
+  }
+
+  Future<void> updateGeoDatabase() async {
+    final result = _bindings.UpdateGeoDatabases().cast<Utf8>().toDartString();
+    if (result.isNotEmpty) {
+      throw Exception(result);
+    }
+  }
+
   CoreStatus launch([bool isAdmin = false]) {
     if (_status == CoreStatus.running) {
       print("Core is rebooting");

@@ -8,6 +8,7 @@ import 'package:clash_flutter/pages/proxies/proxies.dart';
 import 'package:clash_flutter/pages/rules/rules.dart';
 import 'package:clash_flutter/providers/core/core_status.dart';
 import 'package:clash_flutter/providers/memory/memory.dart';
+import 'package:clash_flutter/providers/themes/theme_mode.dart';
 import 'package:clash_flutter/providers/traffics/traffics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -57,8 +58,10 @@ class _HomePageState extends ConsumerState<HomePage> with WindowListener {
   int pageIdx = 0;
   @override
   Widget build(BuildContext context) {
+    MyException.context = context;
     final traffics = ref.watch(trafficsProvider);
     final memory = ref.watch(memoryProvider);
+    final themeMode = ref.watch(themeModeNotifierProvider);
     return Row(
       children: [
         NavigationRail(
@@ -87,9 +90,10 @@ class _HomePageState extends ConsumerState<HomePage> with WindowListener {
                       loading: () =>
                           const Center(child: CircularProgressIndicator()),
                       error: (e, s) {
-                        MyException.show(
+                        MyException(
                             error: e,
-                            recover: () => ref.invalidate(coreStatusProvider));
+                            recover: () =>
+                                ref.invalidate(coreStatusProvider)).show();
                         return null;
                       },
                       data: (traffics) {
@@ -140,10 +144,10 @@ class _HomePageState extends ConsumerState<HomePage> with WindowListener {
                             );
                           },
                           error: (e, s) {
-                            MyException.show(
+                            MyException(
                                 error: e,
                                 recover: () =>
-                                    ref.invalidate(coreStatusProvider));
+                                    ref.invalidate(coreStatusProvider)).show();
                             return null;
                           },
                           loading: () =>
@@ -151,6 +155,22 @@ class _HomePageState extends ConsumerState<HomePage> with WindowListener {
                         )))
               ],
             ),
+          ),
+          trailing: ToggleButtons(
+            isSelected: ThemeMode.values
+                .toList()
+                .map((mode) => mode == themeMode)
+                .toList(),
+            onPressed: (idx) => ref
+                .read(themeModeNotifierProvider.notifier)
+                .mode = ThemeMode.values[idx],
+            children: ThemeMode.values
+                .map((mode) => Icon(switch (mode) {
+                      ThemeMode.system => Icons.auto_mode_rounded,
+                      ThemeMode.light => Icons.light_mode_rounded,
+                      ThemeMode.dark => Icons.dark_mode_rounded,
+                    }))
+                .toList(),
           ),
         ),
         Expanded(child: _pages[pageIdx].$3)

@@ -16,8 +16,9 @@ class ConfigsPage extends ConsumerWidget {
         padding: const EdgeInsets.all(8.0),
         child: configs.when(
           error: (e, s) {
-            MyException.show(
-                error: e, recover: () => ref.invalidate(coreStatusProvider));
+            MyException(
+                error: e,
+                recover: () => ref.invalidate(coreStatusProvider)).show();
             return null;
           },
           loading: () => const Center(
@@ -26,73 +27,76 @@ class ConfigsPage extends ConsumerWidget {
           data: (configs) {
             return ListView(
               children: [
-                ExpansionTile(
+                SwitchListTile(
                   title: const Text("Tun"),
-                  children: [
-                    SwitchListTile(
-                      title: const Text("Enable"),
-                      value: configs.tun?.enable ?? false,
-                      onChanged: (val) => ref
+                  value: configs.tun?.enable ?? false,
+                  onChanged: (val) => ref
+                      .read(configsProvider.notifier)
+                      .patchConfigs((conf) => conf.tun!.enable = val),
+                ),
+                SwitchListTile(
+                  title: const Text("AutoRoute"),
+                  value: configs.tun?.autoRoute ?? false,
+                  onChanged: (configs.tun?.enable ?? false)
+                      ? (val) => ref
                           .read(configsProvider.notifier)
-                          .patchConfigs((conf) => conf.tun!.enable = val),
-                    ),
-                    SwitchListTile(
-                      title: const Text("AutoRoute"),
-                      value: configs.tun?.autoRoute ?? false,
-                      onChanged: (val) => ref
-                          .read(configsProvider.notifier)
-                          .patchConfigs((conf) => conf.tun!.autoRoute = val),
-                    ),
-                    SwitchListTile(
-                      title: const Text("AutoDetectInterface"),
-                      value: configs.tun?.autoDetectInterface ?? false,
-                      onChanged: (val) => ref
+                          .patchConfigs((conf) => conf.tun!.autoRoute = val)
+                      : null,
+                ),
+                SwitchListTile(
+                  title: const Text("AutoDetectInterface"),
+                  value: configs.tun?.autoDetectInterface ?? false,
+                  onChanged: (configs.tun?.enable ?? false)
+                      ? (val) => ref
                           .read(configsProvider.notifier)
                           .patchConfigs(
-                              (conf) => conf.tun!.autoDetectInterface = val),
+                              (conf) => conf.tun!.autoDetectInterface = val)
+                      : null,
+                ),
+                ListTile(
+                  enabled: configs.tun?.enable ?? false,
+                  title: const Text("Stack"),
+                  trailing: SegmentedButton(
+                    showSelectedIcon: false,
+                    segments: Stack.values
+                        .map((stack) => ButtonSegment(
+                            enabled: configs.tun?.enable ?? false,
+                            value: stack,
+                            label: Text(stack.name)))
+                        .toList(),
+                    selected: <Stack>{configs.tun?.stack ?? Stack.mixed},
+                    onSelectionChanged: (val) => ref
+                        .read(configsProvider.notifier)
+                        .patchConfigs((conf) => conf.tun!.stack = val.first),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    enabled: configs.tun?.enable ?? false,
+                    decoration: InputDecoration(
+                      labelText: "device",
+                      hintText: configs.tun?.device,
                     ),
-                    ListTile(
-                      title: const Text("Stack"),
-                      trailing: SegmentedButton(
-                        segments: Stack.values
-                            .map((stack) => ButtonSegment(
-                                value: stack, label: Text(stack.name)))
-                            .toList(),
-                        selected: <Stack>{configs.tun?.stack ?? Stack.mixed},
-                        onSelectionChanged: (val) => ref
-                            .read(configsProvider.notifier)
-                            .patchConfigs(
-                                (conf) => conf.tun!.stack = val.first),
-                      ),
+                    onSubmitted: (val) => ref
+                        .read(configsProvider.notifier)
+                        .patchConfigs((conf) => conf.tun!.device = val),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    enabled: configs.tun?.enable ?? false,
+                    decoration: InputDecoration(
+                      border: const OutlineInputBorder(),
+                      labelText: "dns-hijack",
+                      hintText: configs.tun?.dnsHijack?.join(" "),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextField(
-                        decoration: InputDecoration(
-                          border: const OutlineInputBorder(),
-                          labelText: "device",
-                          hintText: configs.tun?.device,
-                        ),
-                        onSubmitted: (val) => ref
-                            .read(configsProvider.notifier)
-                            .patchConfigs((conf) => conf.tun!.device = val),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextField(
-                        decoration: InputDecoration(
-                          border: const OutlineInputBorder(),
-                          labelText: "dns-hijack",
-                          hintText: configs.tun?.dnsHijack?.join(" "),
-                        ),
-                        onSubmitted: (val) => ref
-                            .read(configsProvider.notifier)
-                            .patchConfigs(
-                                (conf) => conf.tun!.dnsHijack = val.split(" ")),
-                      ),
-                    ),
-                  ],
+                    onSubmitted: (val) => ref
+                        .read(configsProvider.notifier)
+                        .patchConfigs(
+                            (conf) => conf.tun!.dnsHijack = val.split(" ")),
+                  ),
                 ),
               ],
             );

@@ -10,6 +10,7 @@ class ProfilesPage extends ConsumerWidget {
     final profiles = ref.watch(profilesProvider);
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
         actions: [
           TextButton(
             onPressed: ref.read(profilesProvider.notifier).importFromLocal,
@@ -18,35 +19,48 @@ class ProfilesPage extends ConsumerWidget {
           TextButton(
             onPressed: () async {
               bool submitted = false;
+              String? error;
               await showDialog(
                   context: context,
                   builder: (context) {
                     final controller = TextEditingController();
                     return AlertDialog(
                       title: const Text("Import From URL"),
-                      content: submitted
-                          ? const SizedBox(
-                              height: 50,
-                              width: 50,
-                              child: Center(child: CircularProgressIndicator()))
-                          : TextField(
-                              controller: controller,
-                              decoration: const InputDecoration(
-                                  border: OutlineInputBorder()),
-                            ),
-                      actions: [
-                        IconButton(
-                          icon: const Icon(Icons.check_rounded),
-                          onPressed: () async {
-                            submitted = true;
-                            (context as Element).markNeedsBuild();
-                            await ref
-                                .read(profilesProvider.notifier)
-                                .importFromURL(controller.text);
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      ],
+                      content: error == null
+                          ? submitted
+                              ? const SizedBox(
+                                  height: 50,
+                                  width: 50,
+                                  child: Center(
+                                      child: CircularProgressIndicator()))
+                              : TextField(
+                                  controller: controller,
+                                  decoration: const InputDecoration(
+                                      border: OutlineInputBorder()),
+                                )
+                          : Text(error!),
+                      actions: error == null
+                          ? [
+                              IconButton(
+                                icon: const Icon(Icons.check_rounded),
+                                onPressed: () async {
+                                  submitted = true;
+                                  (context as Element).markNeedsBuild();
+                                  try {
+                                    await ref
+                                        .read(profilesProvider.notifier)
+                                        .importFromURL(controller.text);
+                                  } catch (e) {
+                                    error = e.toString();
+                                    (context).markNeedsBuild();
+                                    return;
+                                  }
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pop();
+                                },
+                              ),
+                            ]
+                          : null,
                     );
                   });
             },
@@ -67,11 +81,14 @@ class ProfilesPage extends ConsumerWidget {
             decoration: BoxDecoration(
               boxShadow: [
                 profile.path == profiles.currentProfilePath
-                    ? const BoxShadow(blurRadius: 5, color: Colors.orange)
+                    ? BoxShadow(
+                        blurRadius: 5,
+                        color: Theme.of(context).colorScheme.primaryContainer,
+                      )
                     : const BoxShadow(blurRadius: 2)
               ],
-              borderRadius: BorderRadius.circular(10),
-              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              color: Theme.of(context).colorScheme.primaryContainer,
             ),
             child: Tooltip(
               richMessage: TextSpan(
@@ -102,11 +119,23 @@ class ProfilesPage extends ConsumerWidget {
                       : () => ref
                           .read(profilesProvider.notifier)
                           .switchProfile(profile),
-                  title: Text(
-                    profile.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleMedium,
+                  title: Row(
+                    children: [
+                      Text(
+                        profile.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      if (profile.path == profiles.currentProfilePath)
+                        Container(
+                          margin: const EdgeInsets.only(left: 5),
+                          width: 5,
+                          height: 5,
+                          decoration: const BoxDecoration(
+                              shape: BoxShape.circle, color: Colors.green),
+                        ),
+                    ],
                   ),
                   subtitle: Text(
                     profile.path,

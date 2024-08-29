@@ -6,7 +6,7 @@ part of 'proxies.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$proxiesHash() => r'43a81f0f8c6953bdd19b2fa537a2320301d2539c';
+String _$proxiesHash() => r'db5bfc107b07778f786e87a114e91df3e08c00a6';
 
 /// See also [Proxies].
 @ProviderFor(Proxies)

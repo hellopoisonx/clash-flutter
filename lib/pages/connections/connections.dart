@@ -35,7 +35,9 @@ class _ConnectionsPageState extends ConsumerState<ConnectionsPage> {
                 child: TextField(
                   decoration: InputDecoration(
                       border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5))),
+                          borderRadius: BorderRadius.circular(5)),
+                      hintText:
+                          "Search among ${filteredConnections.value?.connections.length ?? 0} connections"),
                   onChanged: (val) {
                     setState(() => query = val.trim());
                   },
@@ -43,8 +45,8 @@ class _ConnectionsPageState extends ConsumerState<ConnectionsPage> {
               ),
               const SizedBox(width: 5),
               IconButton(
-                onPressed: () async =>
-                    (await ref.read(apisProvider.future)).closeALlConnections(),
+                onPressed: () async => (await ref.read(apisProvider().future))
+                    .closeALlConnections(),
                 icon: const Icon(Icons.cancel_rounded),
               ),
             ],
@@ -56,8 +58,9 @@ class _ConnectionsPageState extends ConsumerState<ConnectionsPage> {
           return _buildConnectionsBoard(horScrollController, _cache, ref);
         },
         error: (error, stack) {
-          MyException.show(
-              error: error, recover: () => ref.invalidate(coreStatusProvider));
+          MyException(
+              error: error,
+              recover: () => ref.invalidate(coreStatusProvider)).show();
           return null;
         },
         data: (connections) {
@@ -83,9 +86,13 @@ class _ConnectionsPageState extends ConsumerState<ConnectionsPage> {
               child: ConstrainedBox(
                 constraints: BoxConstraints(minWidth: constraints.maxWidth),
                 child: Table(
-                  border: const TableBorder(
-                    verticalInside: BorderSide(width: 0.05),
-                    horizontalInside: BorderSide(width: 0.05),
+                  border: TableBorder(
+                    verticalInside: BorderSide(
+                        width: 0.05,
+                        color: Theme.of(context).colorScheme.onSurface),
+                    horizontalInside: BorderSide(
+                        width: 0.05,
+                        color: Theme.of(context).colorScheme.onSurface),
                   ),
                   columnWidths: const {
                     0: FixedColumnWidth(40),
@@ -135,7 +142,9 @@ class _ConnectionsPageState extends ConsumerState<ConnectionsPage> {
                       children.add(TableRow(
                           decoration: BoxDecoration(
                               color: i == hightlightIdx
-                                  ? const Color.fromRGBO(232, 222, 248, 1)
+                                  ? Theme.of(context)
+                                      .colorScheme
+                                      .primaryContainer
                                   : Colors.transparent),
                           children: [
                             IconButton(
@@ -163,7 +172,7 @@ class _ConnectionsPageState extends ConsumerState<ConnectionsPage> {
                                 icon: const Icon(Icons.info)),
                             IconButton(
                                 onPressed: () async =>
-                                    (await ref.read(apisProvider.future))
+                                    (await ref.read(apisProvider().future))
                                         .closeSingleConnection(c.id),
                                 icon: const Icon(Icons.cancel)),
                             Text("${c.metadata.type}(${c.metadata.network})"),

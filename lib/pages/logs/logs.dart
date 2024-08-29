@@ -36,7 +36,6 @@ class _LogsPageState extends ConsumerState<LogsPage> {
               ),
               const SizedBox(width: 5),
               ToggleButtons(
-                borderRadius: BorderRadius.circular(10),
                 isSelected: Type.values.map((t) => t == type).toList(),
                 onPressed: (idx) => setState(() => type = Type.values[idx]),
                 children: Type.values.map<Text>((t) => Text(t.name)).toList(),
@@ -54,8 +53,8 @@ class _LogsPageState extends ConsumerState<LogsPage> {
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: const Color.fromRGBO(242, 242, 242, 1),
+                      borderRadius: BorderRadius.circular(20),
+                      color: Theme.of(context).colorScheme.primaryContainer,
                     ),
                     child: () {
                       final log = logs[idx];
@@ -65,7 +64,7 @@ class _LogsPageState extends ConsumerState<LogsPage> {
                         subtitle: Text(
                           log.type.field,
                           style:
-                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                              Theme.of(context).textTheme.labelMedium?.copyWith(
                                   color: log.type == Type.info
                                       ? Colors.green
                                       : log.type == Type.err
@@ -78,8 +77,9 @@ class _LogsPageState extends ConsumerState<LogsPage> {
                 },
               ),
           error: (e, s) {
-            MyException.show(
-                error: e, recover: () => ref.invalidate(coreStatusProvider));
+            MyException(
+                error: e,
+                recover: () => ref.invalidate(coreStatusProvider)).show();
             return null;
           },
           loading: () => const Center(

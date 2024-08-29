@@ -9,6 +9,7 @@
 *.log
 *.pyc
 *.swp
+assets/Country.mmdb
 .DS_Store
 .atom/
 .buildlog/

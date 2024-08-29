@@ -40,8 +40,9 @@ class _RulesPageState extends ConsumerState<RulesPage> {
       body: rules.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) {
-          MyException.show(
-              error: error, recover: () => ref.invalidate(coreStatusProvider));
+          MyException(
+              error: error,
+              recover: () => ref.invalidate(coreStatusProvider)).show();
           return null;
         },
         data: (List<Rule>? value) => ListView.builder(
@@ -50,8 +51,8 @@ class _RulesPageState extends ConsumerState<RulesPage> {
               margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: const Color.fromRGBO(242, 242, 242, 1),
+                borderRadius: BorderRadius.circular(20),
+                color: Theme.of(context).colorScheme.primaryContainer,
               ),
               child: const ListTile(
                 title: Text("prototypeItem"),
@@ -64,8 +65,8 @@ class _RulesPageState extends ConsumerState<RulesPage> {
                 margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: const Color.fromRGBO(242, 242, 242, 1),
+                  borderRadius: BorderRadius.circular(20),
+                  color: Theme.of(context).colorScheme.primaryContainer,
                 ),
                 child: ListTile(
                   title: Text(rule.payload),

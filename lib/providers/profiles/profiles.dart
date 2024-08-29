@@ -2,13 +2,14 @@ import 'dart:io';
 
 import 'package:clash_core/clash_core.dart';
 import 'package:clash_flutter/constants/constants.dart';
+import 'package:clash_flutter/exception/exception.dart';
 import 'package:clash_flutter/models/profiles/profile.dart';
 import 'package:clash_flutter/models/profiles/profiles.dart' as p;
 import 'package:clash_flutter/models/settings/settings.dart';
 import 'package:clash_flutter/providers/commons/commons.dart';
 import 'package:clash_flutter/providers/core/core_status.dart';
 import 'package:hive/hive.dart';
-import 'package:path/path.dart' as path;
+import 'package:path/path.dart' as p;
 import 'package:file_picker/file_picker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -55,14 +56,20 @@ class Profiles extends _$Profiles {
   }
 
   Future<void> importFromLocal() async {
-    String? result = (await FilePicker.platform.pickFiles())?.files.single.path;
-    if (result == null) {
+    String? path = (await FilePicker.platform.pickFiles())?.files.single.path;
+    if (path == null) {
       return;
     }
-    DateTime t = await File(result).lastModified();
+    DateTime t = await File(path).lastModified();
+    try {
+      clashCore.testProfile(path);
+    } catch (e) {
+      await MyException(error: e).show();
+      return;
+    }
     switchProfile(Profile(
-      name: path.split(result).last,
-      path: result,
+      name: p.split(path).last,
+      path: path,
       createdTime: t,
     ));
   }
@@ -70,6 +77,13 @@ class Profiles extends _$Profiles {
   Future<void> importFromURL(String url) async {
     final apis = await ref.getApis();
     final profile = await apis.downloadProfile(url, Settings.settings.homeDir);
+    try {
+      clashCore.testProfile(profile.path);
+    } catch (e) {
+      print("error: $e");
+      File(profile.path).deleteSync();
+      throw MyException(error: e);
+    }
     switchProfile(profile);
   }
 

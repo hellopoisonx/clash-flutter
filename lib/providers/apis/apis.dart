@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:clash_flutter/exception/exception.dart';
 import 'package:clash_flutter/models/configs/configs.dart';
 import 'package:clash_flutter/models/log/log.dart';
 import 'package:clash_flutter/models/profiles/profile.dart';
@@ -19,22 +20,35 @@ import 'package:hive/hive.dart';
 part 'apis.g.dart';
 
 class Apis {
-  Apis._();
-  static final Apis _instance = Apis._();
   late Dio _http;
   late String _ws;
   static const _timeout = Duration(milliseconds: 2500);
 
-  Future<void> init() async {
-    final box = Hive.box(name: "clash_flutter");
+  Apis(bool needInterceptor) {
+    final box =
+        Hive.box(name: "clash_flutter", directory: Hive.defaultDirectory);
     final Settings settings = box.get("settings");
-    _http = Dio(BaseOptions(
-      baseUrl:
-          "http://${settings.externalControllerBaseAddress}:${settings.externalControllerPort}",
-      connectTimeout: _timeout,
-      sendTimeout: _timeout,
-      receiveTimeout: _timeout,
-    ));
+    if (needInterceptor) {
+      _http = Dio(BaseOptions(
+        baseUrl:
+            "http://${settings.externalControllerBaseAddress}:${settings.externalControllerPort}",
+        connectTimeout: _timeout,
+        sendTimeout: _timeout,
+        receiveTimeout: _timeout,
+      ))
+        ..interceptors.add(InterceptorsWrapper(onError: (e, h) {
+          MyException(error: e).show();
+          h.next(e);
+        }));
+    } else {
+      _http = Dio(BaseOptions(
+        baseUrl:
+            "http://${settings.externalControllerBaseAddress}:${settings.externalControllerPort}",
+        connectTimeout: _timeout,
+        sendTimeout: _timeout,
+        receiveTimeout: _timeout,
+      ));
+    }
     _ws =
         "ws://${settings.externalControllerBaseAddress}:${settings.externalControllerPort}";
   }
@@ -54,7 +68,8 @@ class Apis {
     }
   }
 
-  Future<Map<String, int?>> testSelectorDelay(String target) async {
+  Future<Map<String, int?>> testSelectorDelay(String target,
+      [bool needInterceptor = true]) async {
     try {
       final resp = await _http.get<Map<String, dynamic>>("/group/$target/delay",
           queryParameters: {
@@ -216,21 +231,7 @@ class Apis {
 }
 
 @riverpod
-Future<Apis> apis(ApisRef ref) async {
-  // debounce
-  bool didDispose = false;
-  ref.onDispose(() => didDispose = true);
-  await Future.delayed(const Duration(milliseconds: 500));
-  if (didDispose) {
-    throw Exception("Cancelled");
-  }
-
+Future<Apis> apis(ApisRef ref, [bool needInterceptor = true]) async {
   ref.watch(coreStatusProvider);
-  await Apis._instance.init();
-  if (await Apis._instance.isReady()) {
-    return Apis._instance;
-  } else {
-    ref.invalidateSelf();
-    throw Exception("Apis is not ready");
-  }
+  return Apis(needInterceptor);
 }

@@ -19,7 +19,7 @@ class Proxies extends _$Proxies {
   }
 
   Future<int?> testSingleDelay(String target) async {
-    final apis = await ref.getApis();
+    final apis = await ref.getApis(false);
     final delay = await apis.testSingleDelay(target);
     final prev = await future;
     state =
@@ -28,7 +28,7 @@ class Proxies extends _$Proxies {
   }
 
   Future<Map<String, int?>> testSelectorDelay(Selector target) async {
-    final apis = await ref.getApis();
+    final apis = await ref.getApis(false);
     final Map<String, int?> delays = await apis.testSelectorDelay(target.name);
     for (var node in target.all) {
       delays.addAll({node: delays[node]});

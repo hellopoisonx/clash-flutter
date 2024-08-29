@@ -1,3 +1,4 @@
+import 'package:clash_flutter/exception/exception.dart';
 import 'package:clash_flutter/models/proxies/node.dart';
 import 'package:clash_flutter/models/proxies/selector.dart';
 import 'package:clash_flutter/models/proxies/type.dart';
@@ -27,8 +28,8 @@ class ProxiesPage extends ConsumerWidget {
               return Container(
                 margin: const EdgeInsets.all(5),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: const Color.fromRGBO(242, 242, 242, 1),
+                  borderRadius: BorderRadius.circular(20),
+                  color: Theme.of(context).colorScheme.primaryContainer,
                 ),
                 child: ExpansionTile(
                   title: Text(selector.name),
@@ -63,12 +64,20 @@ class ProxiesPage extends ConsumerWidget {
                           decoration: BoxDecoration(
                             boxShadow: [
                               node.name == selector.now
-                                  ? const BoxShadow(
-                                      blurRadius: 5, color: Colors.orange)
-                                  : const BoxShadow(blurRadius: 2)
+                                  ? BoxShadow(
+                                      blurRadius: 10,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .primaryContainer,
+                                    )
+                                  : const BoxShadow(
+                                      blurRadius: 3,
+                                    )
                             ],
-                            borderRadius: BorderRadius.circular(10),
-                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .secondaryContainer,
                           ),
                           child: InkWell(
                             onTap: () => ref
@@ -83,9 +92,23 @@ class ProxiesPage extends ConsumerWidget {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Expanded(
-                                          child: Text(
-                                        node.name,
-                                        overflow: TextOverflow.ellipsis,
+                                          child: Row(
+                                        children: [
+                                          Text(
+                                            node.name,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          if (selector.now == node.name)
+                                            Container(
+                                              margin: const EdgeInsets.only(
+                                                  left: 5),
+                                              width: 5,
+                                              height: 5,
+                                              decoration: const BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: Colors.green),
+                                            ),
+                                        ],
                                       )),
                                       Row(
                                         children: [
@@ -109,21 +132,30 @@ class ProxiesPage extends ConsumerWidget {
                                           if (node.type == Type.Selector ||
                                               node.type == Type.URLTest)
                                             Expanded(
-                                              child: Text(
-                                                (node as Selector).now,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .labelSmall,
+                                              child: Align(
+                                                alignment:
+                                                    Alignment.centerRight,
+                                                child: Text(
+                                                  (node as Selector).now,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .labelSmall,
+                                                ),
                                               ),
                                             ),
                                           if (node.type != Type.Selector &&
                                               node.type != Type.URLTest)
                                             Expanded(
-                                              child: StatusIndicator(
-                                                status: (node as Node).udp,
-                                                prefix: "udp",
-                                                size: 5,
+                                              child: Align(
+                                                alignment:
+                                                    Alignment.centerRight,
+                                                child: StatusIndicator(
+                                                  status: (node as Node).udp,
+                                                  prefix: "udp",
+                                                  size: 5,
+                                                ),
                                               ),
                                             ),
                                         ],
@@ -152,8 +184,10 @@ class ProxiesPage extends ConsumerWidget {
             },
           ),
           error: (e, s) {
-            ref.invalidate(coreStatusProvider);
-            return null;
+            MyException(
+                error: e,
+                recover: () => ref.invalidate(coreStatusProvider)).show();
+            return const Placeholder();
           },
           loading: () => const Center(
             child: CircularProgressIndicator(),
