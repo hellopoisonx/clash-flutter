@@ -10,10 +10,10 @@ part 'proxies.freezed.dart';
 @Freezed(equal: true, toJson: false, fromJson: false, copyWith: true)
 class Proxies with _$Proxies {
   const Proxies._();
-  const factory Proxies(
-      {required final Map<String, Selector> selectors,
-      required final Map<String, Selectable> all,
-      required final Map<String, int?> delays}) = _Proxies;
+  const factory Proxies({
+    required final Map<String, Selector> selectors,
+    required final Map<String, Selectable> all,
+  }) = _Proxies;
 
   factory Proxies.fromJson(Map<String, dynamic> json) {
     _e(!json.containsKey("proxies"));
@@ -32,7 +32,7 @@ class Proxies with _$Proxies {
         all.addAll({k: Node.fromJson(v)});
       }
     }
-    return Proxies(selectors: selectors, all: all, delays: {});
+    return Proxies(selectors: selectors, all: all);
   }
 
   static void _e(bool f) {

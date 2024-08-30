@@ -8,6 +8,9 @@ part of 'node.dart';
 
 _$NodeImpl _$$NodeImplFromJson(Map<String, dynamic> json) => _$NodeImpl(
       name: json['name'] as String,
+      history: (json['history'] as List<dynamic>)
+          .map((e) => History.fromJson(e as Map<String, dynamic>))
+          .toList(),
       type: $enumDecode(_$TypeEnumMap, json['type']),
       udp: json['udp'] as bool,
     );
@@ -15,6 +18,7 @@ _$NodeImpl _$$NodeImplFromJson(Map<String, dynamic> json) => _$NodeImpl(
 Map<String, dynamic> _$$NodeImplToJson(_$NodeImpl instance) =>
     <String, dynamic>{
       'name': instance.name,
+      'history': instance.history,
       'type': _$TypeEnumMap[instance.type]!,
       'udp': instance.udp,
     };

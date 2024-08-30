@@ -1,3 +1,4 @@
+import 'package:clash_core/clash_core.dart';
 import 'package:clash_flutter/exception/exception.dart';
 import 'package:clash_flutter/providers/configs/configs.dart';
 import 'package:clash_flutter/models/configs/configs.dart';
@@ -96,6 +97,19 @@ class ConfigsPage extends ConsumerWidget {
                         .read(configsProvider.notifier)
                         .patchConfigs(
                             (conf) => conf.tun!.dnsHijack = val.split(" ")),
+                  ),
+                ),
+                ListTile(
+                  title: const Text("GeoDatabase"),
+                  trailing: TextButton(
+                    onPressed: () async {
+                      try {
+                        await clashCore.updateGeoDatabase();
+                      } catch (e) {
+                        await MyException(error: e).show();
+                      }
+                    },
+                    child: const Text("Upgrade"),
                   ),
                 ),
               ],

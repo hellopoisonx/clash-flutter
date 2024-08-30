@@ -58,7 +58,6 @@ class _HomePageState extends ConsumerState<HomePage> with WindowListener {
   int pageIdx = 0;
   @override
   Widget build(BuildContext context) {
-    MyException.context = context;
     final traffics = ref.watch(trafficsProvider);
     final memory = ref.watch(memoryProvider);
     final themeMode = ref.watch(themeModeNotifierProvider);

@@ -2,7 +2,6 @@ import 'package:clash_flutter/exception/exception.dart';
 import 'package:clash_flutter/pages/home.dart';
 import 'package:clash_core/clash_core.dart';
 import 'package:clash_flutter/providers/core/core_status.dart';
-import 'package:clash_flutter/providers/logs/logs.dart';
 import 'package:clash_flutter/providers/themes/theme_mode.dart';
 import 'package:clash_flutter/themes/default.dart';
 import 'package:flutter/material.dart';
@@ -47,9 +46,8 @@ class App extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    MyException.context = context;
     final status = ref.watch(coreStatusProvider);
-    ref.watch(logsProvider);
+    MyException.context = context;
     return Scaffold(
       body: status.when(
           data: (status) {

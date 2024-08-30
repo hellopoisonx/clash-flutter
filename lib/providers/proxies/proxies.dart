@@ -1,7 +1,10 @@
 import 'dart:async';
 
+import 'package:clash_flutter/models/configs/proxy_mode.dart';
 import 'package:clash_flutter/models/proxies/selector.dart';
+import 'package:clash_flutter/models/proxies/type.dart';
 import 'package:clash_flutter/providers/commons/commons.dart';
+import 'package:clash_flutter/providers/configs/configs.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:clash_flutter/models/proxies/proxies.dart' as p;
 
@@ -12,18 +15,33 @@ class Proxies extends _$Proxies {
   @override
   Future<p.Proxies> build() async {
     final apis = await ref.getApis();
-    final alive = ref.keepAlive();
-    final timer = Timer(const Duration(minutes: 1), alive.close);
-    ref.onDispose(timer.cancel);
-    return await apis.getProxies();
+    final mode = await ref.watch(
+        configsProvider.selectAsync((conf) => conf.mode ?? ProxyMode.rule));
+    final proxies = await apis.getProxies();
+    return switch (mode) {
+      ProxyMode.global =>
+        proxies.copyWith(selectors: {"GLOBAL": proxies.selectors["GLOBAL"]!}),
+      ProxyMode.rule =>
+        proxies.copyWith(selectors: {...proxies.selectors}..remove("GLOBAL")),
+      ProxyMode.direct => proxies.copyWith(
+          selectors: {
+            "DIRECT": Selector(
+              name: "DIRECT",
+              now: 'DIRECT',
+              all: ["DIRECT"],
+              history: proxies.all["DIRECT"]!.history,
+              type: Type.Selector,
+            )
+          },
+          all: {"DIRECT": proxies.all["DIRECT"]!},
+        ),
+    };
   }
 
   Future<int?> testSingleDelay(String target) async {
     final apis = await ref.getApis(false);
     final delay = await apis.testSingleDelay(target);
-    final prev = await future;
-    state =
-        AsyncValue.data(prev.copyWith(delays: {...prev.delays, target: delay}));
+    ref.invalidateSelf();
     return delay;
   }
 
@@ -33,18 +51,13 @@ class Proxies extends _$Proxies {
     for (var node in target.all) {
       delays.addAll({node: delays[node]});
     }
-    var prev = await future;
-    state = AsyncValue.data(prev.copyWith(delays: {...prev.delays, ...delays}));
+    ref.invalidateSelf();
     return delays;
   }
 
   void changeProxyInGroup(String group, String proxy) async {
     final apis = await ref.getApis();
     await apis.changeProxyInGroup(group, proxy);
-    final prev = await future;
-    state = AsyncValue.data(prev.copyWith(selectors: {
-      ...prev.selectors,
-      group: prev.selectors[group]!.copyWith(now: proxy)
-    }));
+    ref.invalidateSelf();
   }
 }

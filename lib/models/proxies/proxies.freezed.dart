@@ -18,7 +18,6 @@ final _privateConstructorUsedError = UnsupportedError(
 mixin _$Proxies {
   Map<String, Selector> get selectors => throw _privateConstructorUsedError;
   Map<String, Selectable> get all => throw _privateConstructorUsedError;
-  Map<String, int?> get delays => throw _privateConstructorUsedError;
 
   /// Create a copy of Proxies
   /// with the given fields replaced by the non-null parameter values.
@@ -31,10 +30,7 @@ abstract class $ProxiesCopyWith<$Res> {
   factory $ProxiesCopyWith(Proxies value, $Res Function(Proxies) then) =
       _$ProxiesCopyWithImpl<$Res, Proxies>;
   @useResult
-  $Res call(
-      {Map<String, Selector> selectors,
-      Map<String, Selectable> all,
-      Map<String, int?> delays});
+  $Res call({Map<String, Selector> selectors, Map<String, Selectable> all});
 }
 
 /// @nodoc
@@ -54,7 +50,6 @@ class _$ProxiesCopyWithImpl<$Res, $Val extends Proxies>
   $Res call({
     Object? selectors = null,
     Object? all = null,
-    Object? delays = null,
   }) {
     return _then(_value.copyWith(
       selectors: null == selectors
@@ -65,10 +60,6 @@ class _$ProxiesCopyWithImpl<$Res, $Val extends Proxies>
           ? _value.all
           : all // ignore: cast_nullable_to_non_nullable
               as Map<String, Selectable>,
-      delays: null == delays
-          ? _value.delays
-          : delays // ignore: cast_nullable_to_non_nullable
-              as Map<String, int?>,
     ) as $Val);
   }
 }
@@ -80,10 +71,7 @@ abstract class _$$ProxiesImplCopyWith<$Res> implements $ProxiesCopyWith<$Res> {
       __$$ProxiesImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {Map<String, Selector> selectors,
-      Map<String, Selectable> all,
-      Map<String, int?> delays});
+  $Res call({Map<String, Selector> selectors, Map<String, Selectable> all});
 }
 
 /// @nodoc
@@ -101,7 +89,6 @@ class __$$ProxiesImplCopyWithImpl<$Res>
   $Res call({
     Object? selectors = null,
     Object? all = null,
-    Object? delays = null,
   }) {
     return _then(_$ProxiesImpl(
       selectors: null == selectors
@@ -112,10 +99,6 @@ class __$$ProxiesImplCopyWithImpl<$Res>
           ? _value._all
           : all // ignore: cast_nullable_to_non_nullable
               as Map<String, Selectable>,
-      delays: null == delays
-          ? _value._delays
-          : delays // ignore: cast_nullable_to_non_nullable
-              as Map<String, int?>,
     ));
   }
 }
@@ -125,11 +108,9 @@ class __$$ProxiesImplCopyWithImpl<$Res>
 class _$ProxiesImpl extends _Proxies {
   const _$ProxiesImpl(
       {required final Map<String, Selector> selectors,
-      required final Map<String, Selectable> all,
-      required final Map<String, int?> delays})
+      required final Map<String, Selectable> all})
       : _selectors = selectors,
         _all = all,
-        _delays = delays,
         super._();
 
   final Map<String, Selector> _selectors;
@@ -148,17 +129,9 @@ class _$ProxiesImpl extends _Proxies {
     return EqualUnmodifiableMapView(_all);
   }
 
-  final Map<String, int?> _delays;
-  @override
-  Map<String, int?> get delays {
-    if (_delays is EqualUnmodifiableMapView) return _delays;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableMapView(_delays);
-  }
-
   @override
   String toString() {
-    return 'Proxies(selectors: $selectors, all: $all, delays: $delays)';
+    return 'Proxies(selectors: $selectors, all: $all)';
   }
 
   @override
@@ -168,16 +141,14 @@ class _$ProxiesImpl extends _Proxies {
             other is _$ProxiesImpl &&
             const DeepCollectionEquality()
                 .equals(other._selectors, _selectors) &&
-            const DeepCollectionEquality().equals(other._all, _all) &&
-            const DeepCollectionEquality().equals(other._delays, _delays));
+            const DeepCollectionEquality().equals(other._all, _all));
   }
 
   @override
   int get hashCode => Object.hash(
       runtimeType,
       const DeepCollectionEquality().hash(_selectors),
-      const DeepCollectionEquality().hash(_all),
-      const DeepCollectionEquality().hash(_delays));
+      const DeepCollectionEquality().hash(_all));
 
   /// Create a copy of Proxies
   /// with the given fields replaced by the non-null parameter values.
@@ -191,16 +162,13 @@ class _$ProxiesImpl extends _Proxies {
 abstract class _Proxies extends Proxies {
   const factory _Proxies(
       {required final Map<String, Selector> selectors,
-      required final Map<String, Selectable> all,
-      required final Map<String, int?> delays}) = _$ProxiesImpl;
+      required final Map<String, Selectable> all}) = _$ProxiesImpl;
   const _Proxies._() : super._();
 
   @override
   Map<String, Selector> get selectors;
   @override
   Map<String, Selectable> get all;
-  @override
-  Map<String, int?> get delays;
 
   /// Create a copy of Proxies
   /// with the given fields replaced by the non-null parameter values.

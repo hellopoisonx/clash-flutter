@@ -8,6 +8,7 @@ part 'logs.g.dart';
 @riverpod
 Stream<List<Log>> logs(LogsRef ref) async* {
   final apis = await ref.getApis();
+  ref.keepAlive();
   final stream = apis.getLogs();
   final List<Log> logs = [];
   await for (var log in stream) {

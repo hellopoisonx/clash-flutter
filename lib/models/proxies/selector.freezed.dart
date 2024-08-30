@@ -23,6 +23,7 @@ mixin _$Selector {
   String get name => throw _privateConstructorUsedError;
   String get now => throw _privateConstructorUsedError;
   List<String> get all => throw _privateConstructorUsedError;
+  List<History> get history => throw _privateConstructorUsedError;
   Type get type => throw _privateConstructorUsedError;
 
   /// Serializes this Selector to a JSON map.
@@ -40,7 +41,12 @@ abstract class $SelectorCopyWith<$Res> {
   factory $SelectorCopyWith(Selector value, $Res Function(Selector) then) =
       _$SelectorCopyWithImpl<$Res, Selector>;
   @useResult
-  $Res call({String name, String now, List<String> all, Type type});
+  $Res call(
+      {String name,
+      String now,
+      List<String> all,
+      List<History> history,
+      Type type});
 }
 
 /// @nodoc
@@ -61,6 +67,7 @@ class _$SelectorCopyWithImpl<$Res, $Val extends Selector>
     Object? name = null,
     Object? now = null,
     Object? all = null,
+    Object? history = null,
     Object? type = null,
   }) {
     return _then(_value.copyWith(
@@ -76,6 +83,10 @@ class _$SelectorCopyWithImpl<$Res, $Val extends Selector>
           ? _value.all
           : all // ignore: cast_nullable_to_non_nullable
               as List<String>,
+      history: null == history
+          ? _value.history
+          : history // ignore: cast_nullable_to_non_nullable
+              as List<History>,
       type: null == type
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
@@ -92,7 +103,12 @@ abstract class _$$SelectorImplCopyWith<$Res>
       __$$SelectorImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String name, String now, List<String> all, Type type});
+  $Res call(
+      {String name,
+      String now,
+      List<String> all,
+      List<History> history,
+      Type type});
 }
 
 /// @nodoc
@@ -111,6 +127,7 @@ class __$$SelectorImplCopyWithImpl<$Res>
     Object? name = null,
     Object? now = null,
     Object? all = null,
+    Object? history = null,
     Object? type = null,
   }) {
     return _then(_$SelectorImpl(
@@ -126,6 +143,10 @@ class __$$SelectorImplCopyWithImpl<$Res>
           ? _value._all
           : all // ignore: cast_nullable_to_non_nullable
               as List<String>,
+      history: null == history
+          ? _value._history
+          : history // ignore: cast_nullable_to_non_nullable
+              as List<History>,
       type: null == type
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
@@ -141,8 +162,10 @@ class _$SelectorImpl with DiagnosticableTreeMixin implements _Selector {
       {required this.name,
       required this.now,
       required final List<String> all,
+      required final List<History> history,
       required this.type})
-      : _all = all;
+      : _all = all,
+        _history = history;
 
   factory _$SelectorImpl.fromJson(Map<String, dynamic> json) =>
       _$$SelectorImplFromJson(json);
@@ -159,12 +182,20 @@ class _$SelectorImpl with DiagnosticableTreeMixin implements _Selector {
     return EqualUnmodifiableListView(_all);
   }
 
+  final List<History> _history;
+  @override
+  List<History> get history {
+    if (_history is EqualUnmodifiableListView) return _history;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_history);
+  }
+
   @override
   final Type type;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'Selector(name: $name, now: $now, all: $all, type: $type)';
+    return 'Selector(name: $name, now: $now, all: $all, history: $history, type: $type)';
   }
 
   @override
@@ -175,6 +206,7 @@ class _$SelectorImpl with DiagnosticableTreeMixin implements _Selector {
       ..add(DiagnosticsProperty('name', name))
       ..add(DiagnosticsProperty('now', now))
       ..add(DiagnosticsProperty('all', all))
+      ..add(DiagnosticsProperty('history', history))
       ..add(DiagnosticsProperty('type', type));
   }
 
@@ -186,13 +218,19 @@ class _$SelectorImpl with DiagnosticableTreeMixin implements _Selector {
             (identical(other.name, name) || other.name == name) &&
             (identical(other.now, now) || other.now == now) &&
             const DeepCollectionEquality().equals(other._all, _all) &&
+            const DeepCollectionEquality().equals(other._history, _history) &&
             (identical(other.type, type) || other.type == type));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
-      runtimeType, name, now, const DeepCollectionEquality().hash(_all), type);
+      runtimeType,
+      name,
+      now,
+      const DeepCollectionEquality().hash(_all),
+      const DeepCollectionEquality().hash(_history),
+      type);
 
   /// Create a copy of Selector
   /// with the given fields replaced by the non-null parameter values.
@@ -215,6 +253,7 @@ abstract class _Selector implements Selector {
       {required final String name,
       required final String now,
       required final List<String> all,
+      required final List<History> history,
       required final Type type}) = _$SelectorImpl;
 
   factory _Selector.fromJson(Map<String, dynamic> json) =
@@ -226,6 +265,8 @@ abstract class _Selector implements Selector {
   String get now;
   @override
   List<String> get all;
+  @override
+  List<History> get history;
   @override
   Type get type;
 

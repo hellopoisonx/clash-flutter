@@ -1,3 +1,4 @@
+import 'package:clash_flutter/models/proxies/history.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:clash_flutter/models/proxies/selectable.dart';
 import 'package:clash_flutter/models/proxies/type.dart';
@@ -12,6 +13,7 @@ class Selector with _$Selector, Selectable {
     required String name,
     required String now,
     required List<String> all,
+    required List<History> history,
     required Type type,
   }) = _Selector;
   factory Selector.fromJson(Map<String, dynamic> json) =>

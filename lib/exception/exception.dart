@@ -20,35 +20,35 @@ class MyException {
     if (context == null) {
       throw Exception("Context hasn't been initialized");
     }
-    ScaffoldMessenger.of(context!).showSnackBar(
-      SnackBar(
-        content: Text(error.toString()),
-        action: SnackBarAction(
-          label: "retry",
-          onPressed: () {
-            if (recover != null) {
-              recover!();
-            }
-          },
-        ),
-      ),
-    );
-    //await showDialog(
-    //    context: context!,
-    //    builder: (context) => AlertDialog(
-    //          title: const Text("Error"),
-    //          content: Text(error != null ? error.toString() : "Unknwon"),
-    //          actions: [
-    //            IconButton(
-    //                tooltip: "Recover from errors",
-    //                onPressed: recover,
-    //                icon: const Icon(Icons.restore_rounded)),
-    //            IconButton(
-    //                tooltip: "Exit",
-    //                onPressed: Navigator.of(context).pop,
-    //                icon: const Icon(Icons.exit_to_app_rounded)),
-    //          ],
-    //        ));
+    //ScaffoldMessenger.of(context!).showSnackBar(
+    //  SnackBar(
+    //    content: Text(error.toString()),
+    //    action: SnackBarAction(
+    //      label: "retry",
+    //      onPressed: () {
+    //        if (recover != null) {
+    //          recover!();
+    //        }
+    //      },
+    //    ),
+    //  ),
+    //);
+    await showDialog(
+        context: context!,
+        builder: (context) => AlertDialog(
+              title: const Text("Error"),
+              content: Text(error != null ? error.toString() : "Unknwon"),
+              actions: [
+                IconButton(
+                    tooltip: "Recover from errors",
+                    onPressed: recover,
+                    icon: const Icon(Icons.restore_rounded)),
+                IconButton(
+                    tooltip: "Exit",
+                    onPressed: Navigator.of(context).pop,
+                    icon: const Icon(Icons.exit_to_app_rounded)),
+              ],
+            ));
   }
 }
 
@@ -63,12 +63,11 @@ class MyObserver extends ProviderObserver {
   ) {
     try {
       final err = error as MyException;
-      print("error: ${err.error} $stackTrace");
       if (err.level > 0) {
         err.show();
       }
     } catch (e) {
-      print("error: $error $stackTrace");
+      print("$error $stackTrace");
       MyException(error: error).show();
     }
   }

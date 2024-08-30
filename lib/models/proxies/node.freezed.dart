@@ -21,6 +21,7 @@ Node _$NodeFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$Node {
   String get name => throw _privateConstructorUsedError;
+  List<History> get history => throw _privateConstructorUsedError;
   Type get type => throw _privateConstructorUsedError;
   bool get udp => throw _privateConstructorUsedError;
 
@@ -38,7 +39,7 @@ abstract class $NodeCopyWith<$Res> {
   factory $NodeCopyWith(Node value, $Res Function(Node) then) =
       _$NodeCopyWithImpl<$Res, Node>;
   @useResult
-  $Res call({String name, Type type, bool udp});
+  $Res call({String name, List<History> history, Type type, bool udp});
 }
 
 /// @nodoc
@@ -57,6 +58,7 @@ class _$NodeCopyWithImpl<$Res, $Val extends Node>
   @override
   $Res call({
     Object? name = null,
+    Object? history = null,
     Object? type = null,
     Object? udp = null,
   }) {
@@ -65,6 +67,10 @@ class _$NodeCopyWithImpl<$Res, $Val extends Node>
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
+      history: null == history
+          ? _value.history
+          : history // ignore: cast_nullable_to_non_nullable
+              as List<History>,
       type: null == type
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
@@ -84,7 +90,7 @@ abstract class _$$NodeImplCopyWith<$Res> implements $NodeCopyWith<$Res> {
       __$$NodeImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String name, Type type, bool udp});
+  $Res call({String name, List<History> history, Type type, bool udp});
 }
 
 /// @nodoc
@@ -100,6 +106,7 @@ class __$$NodeImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? name = null,
+    Object? history = null,
     Object? type = null,
     Object? udp = null,
   }) {
@@ -108,6 +115,10 @@ class __$$NodeImplCopyWithImpl<$Res>
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
+      history: null == history
+          ? _value._history
+          : history // ignore: cast_nullable_to_non_nullable
+              as List<History>,
       type: null == type
           ? _value.type
           : type // ignore: cast_nullable_to_non_nullable
@@ -123,13 +134,26 @@ class __$$NodeImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$NodeImpl with DiagnosticableTreeMixin implements _Node {
-  const _$NodeImpl({required this.name, required this.type, required this.udp});
+  const _$NodeImpl(
+      {required this.name,
+      required final List<History> history,
+      required this.type,
+      required this.udp})
+      : _history = history;
 
   factory _$NodeImpl.fromJson(Map<String, dynamic> json) =>
       _$$NodeImplFromJson(json);
 
   @override
   final String name;
+  final List<History> _history;
+  @override
+  List<History> get history {
+    if (_history is EqualUnmodifiableListView) return _history;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_history);
+  }
+
   @override
   final Type type;
   @override
@@ -137,7 +161,7 @@ class _$NodeImpl with DiagnosticableTreeMixin implements _Node {
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'Node(name: $name, type: $type, udp: $udp)';
+    return 'Node(name: $name, history: $history, type: $type, udp: $udp)';
   }
 
   @override
@@ -146,6 +170,7 @@ class _$NodeImpl with DiagnosticableTreeMixin implements _Node {
     properties
       ..add(DiagnosticsProperty('type', 'Node'))
       ..add(DiagnosticsProperty('name', name))
+      ..add(DiagnosticsProperty('history', history))
       ..add(DiagnosticsProperty('type', type))
       ..add(DiagnosticsProperty('udp', udp));
   }
@@ -156,13 +181,15 @@ class _$NodeImpl with DiagnosticableTreeMixin implements _Node {
         (other.runtimeType == runtimeType &&
             other is _$NodeImpl &&
             (identical(other.name, name) || other.name == name) &&
+            const DeepCollectionEquality().equals(other._history, _history) &&
             (identical(other.type, type) || other.type == type) &&
             (identical(other.udp, udp) || other.udp == udp));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, name, type, udp);
+  int get hashCode => Object.hash(runtimeType, name,
+      const DeepCollectionEquality().hash(_history), type, udp);
 
   /// Create a copy of Node
   /// with the given fields replaced by the non-null parameter values.
@@ -183,6 +210,7 @@ class _$NodeImpl with DiagnosticableTreeMixin implements _Node {
 abstract class _Node implements Node {
   const factory _Node(
       {required final String name,
+      required final List<History> history,
       required final Type type,
       required final bool udp}) = _$NodeImpl;
 
@@ -190,6 +218,8 @@ abstract class _Node implements Node {
 
   @override
   String get name;
+  @override
+  List<History> get history;
   @override
   Type get type;
   @override

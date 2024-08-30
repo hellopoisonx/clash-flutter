@@ -106,43 +106,60 @@ class ProfilesPage extends ConsumerWidget {
                   TextSpan(text: "path: ${profile.path}"),
                 ],
               ),
-              child: ListTile(
-                  trailing: IconButton(
-                    iconSize: 18,
-                    icon: const Icon(Icons.delete_rounded),
-                    onPressed: () => ref
-                        .read(profilesProvider.notifier)
-                        .deleteProfile(profile),
-                  ),
-                  onTap: profile.path == profiles.currentProfilePath
-                      ? null
-                      : () => ref
-                          .read(profilesProvider.notifier)
-                          .switchProfile(profile),
-                  title: Row(
-                    children: [
-                      Text(
-                        profile.name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleMedium,
+              child: Container(
+                decoration: profile.path == profiles.currentProfilePath
+                    ? BoxDecoration(
+                        border: Border.all(),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: const [BoxShadow(blurRadius: 0)],
+                        color: Theme.of(context).colorScheme.tertiaryContainer,
+                      )
+                    : BoxDecoration(
+                        border: Border.all(),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: const [
+                          BoxShadow(blurRadius: 2, offset: Offset(2, 2))
+                        ],
+                        color: Theme.of(context).colorScheme.secondaryContainer,
                       ),
-                      if (profile.path == profiles.currentProfilePath)
-                        Container(
-                          margin: const EdgeInsets.only(left: 5),
-                          width: 5,
-                          height: 5,
-                          decoration: const BoxDecoration(
-                              shape: BoxShape.circle, color: Colors.green),
+                child: ListTile(
+                    trailing: IconButton(
+                      iconSize: 18,
+                      icon: const Icon(Icons.delete_rounded),
+                      onPressed: () => ref
+                          .read(profilesProvider.notifier)
+                          .deleteProfile(profile),
+                    ),
+                    onTap: profile.path == profiles.currentProfilePath
+                        ? null
+                        : () => ref
+                            .read(profilesProvider.notifier)
+                            .switchProfile(profile),
+                    title: Row(
+                      children: [
+                        Text(
+                          profile.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleMedium,
                         ),
-                    ],
-                  ),
-                  subtitle: Text(
-                    profile.path,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.labelMedium,
-                  )),
+                        if (profile.path == profiles.currentProfilePath)
+                          Container(
+                            margin: const EdgeInsets.only(left: 5),
+                            width: 5,
+                            height: 5,
+                            decoration: const BoxDecoration(
+                                shape: BoxShape.circle, color: Colors.green),
+                          ),
+                      ],
+                    ),
+                    subtitle: Text(
+                      profile.path,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.labelMedium,
+                    )),
+              ),
             ),
           );
         },

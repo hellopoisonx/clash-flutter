@@ -6,7 +6,7 @@ part of 'core_status.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$coreStatusHash() => r'0f6aa5db69bbbd6908cc0e5a3f21a721c0d37645';
+String _$coreStatusHash() => r'745e05f9f5d9a7651fdaf3e8343a57efd79c303b';
 
 /// See also [coreStatus].
 @ProviderFor(coreStatus)

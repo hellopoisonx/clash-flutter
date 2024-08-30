@@ -11,6 +11,9 @@ _$SelectorImpl _$$SelectorImplFromJson(Map<String, dynamic> json) =>
       name: json['name'] as String,
       now: json['now'] as String,
       all: (json['all'] as List<dynamic>).map((e) => e as String).toList(),
+      history: (json['history'] as List<dynamic>)
+          .map((e) => History.fromJson(e as Map<String, dynamic>))
+          .toList(),
       type: $enumDecode(_$TypeEnumMap, json['type']),
     );
 
@@ -19,6 +22,7 @@ Map<String, dynamic> _$$SelectorImplToJson(_$SelectorImpl instance) =>
       'name': instance.name,
       'now': instance.now,
       'all': instance.all,
+      'history': instance.history,
       'type': _$TypeEnumMap[instance.type]!,
     };
 

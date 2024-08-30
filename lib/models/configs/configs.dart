@@ -1,6 +1,8 @@
+import 'package:clash_flutter/models/configs/proxy_mode.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
+
 part 'configs.freezed.dart';
 part 'configs.g.dart';
 
@@ -22,7 +24,7 @@ class Configs with _$Configs {
     @JsonKey(name: 'bind-address') String? bindAddress,
     @JsonKey(name: 'inbound-tfo') bool? inboundTfo,
     @JsonKey(name: 'inbound-mptcp') bool? inboundMptcp,
-    @JsonKey(name: 'mode') String? mode,
+    @JsonKey(name: 'mode') ProxyMode? mode,
     @JsonKey(name: 'UnifiedDelay') bool? unifiedDelay,
     @JsonKey(name: 'log-level') String? logLevel,
     @JsonKey(name: 'ipv6') bool? ipv6,
@@ -118,10 +120,10 @@ class GeoxUrl with _$GeoxUrl {
       _$GeoxUrlFromJson(json);
 }
 
-@JsonEnum(valueField: "field")
+@JsonEnum(valueField: 'field')
 enum Stack {
   mixed("Mixed"),
-  gvisor("gVisor"),
+  gvisor("Gvisor"),
   system("System"),
   lwip("Lwip");
 
